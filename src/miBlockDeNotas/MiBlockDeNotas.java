@@ -14,13 +14,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  *
  * @author Matias
  */
-public class MiBlockDeNotas extends javax.swing.JFrame {
+public class MiBlockDeNotas extends javax.swing.JFrame
+        implements DocumentListener {
 
     // Variables internas
     private boolean huboCambios = false;
@@ -85,7 +88,12 @@ public class MiBlockDeNotas extends javax.swing.JFrame {
         //File archivoFile = fileChooser.getSelectedFile();
         
         String path = fileChooser.getSelectedFile().getPath();
-        path = path.substring(0, path.lastIndexOf('.'));
+        try {
+            path = path.substring(0, path.lastIndexOf('.'));
+        }
+        catch (IndexOutOfBoundsException ex) {
+            //no tenia extension
+        }
         archivoFile = new File (path+".txt");
 
         FileWriter archivoWriter;
@@ -143,6 +151,9 @@ public class MiBlockDeNotas extends javax.swing.JFrame {
      */
     public MiBlockDeNotas() {
         initComponents();
+        
+        //escucho los cambios en la caja de texto
+        textArea.getDocument().addDocumentListener(this);
     }
 
     /**
@@ -172,11 +183,6 @@ public class MiBlockDeNotas extends javax.swing.JFrame {
 
         textArea.setColumns(20);
         textArea.setRows(5);
-        textArea.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                textAreaKeyPressed(evt);
-            }
-        });
         jScrollPane1.setViewportView(textArea);
 
         MenuArchivo.setText("Archivo");
@@ -281,25 +287,29 @@ public class MiBlockDeNotas extends javax.swing.JFrame {
         
         guardarCambios();
         
+        textArea.getDocument().removeDocumentListener(this);
+        
         archivoFile=null;
         this.setTitle("");
         textArea.setText("");    
-        huboCambios=false;    
+        huboCambios=false;   
+        
+        textArea.getDocument().addDocumentListener(this);
     }//GEN-LAST:event_nuevoMenuItemActionPerformed
 
     private void pegarMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pegarMenuItemActionPerformed
         textArea.paste();
-        huboCambios = true;
     }//GEN-LAST:event_pegarMenuItemActionPerformed
 
     private void abrirMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_abrirMenuItemActionPerformed
         
         guardarCambios();
         
+        textArea.getDocument().removeDocumentListener(this);
+        
         abrirArchivo();
                     
-        this.setTitle(archivoFile.getAbsolutePath());
-        huboCambios = false;
+        textArea.getDocument().addDocumentListener(this);
         
     }//GEN-LAST:event_abrirMenuItemActionPerformed
 
@@ -335,13 +345,8 @@ public class MiBlockDeNotas extends javax.swing.JFrame {
         if(!textArea.getSelectedText().isEmpty())
         {
             textArea.cut();
-            huboCambios = true;
         }
     }//GEN-LAST:event_cortarMenuItemActionPerformed
-
-    private void textAreaKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textAreaKeyPressed
-        huboCambios = true;
-    }//GEN-LAST:event_textAreaKeyPressed
 
     /**
      * @param args the command line arguments
@@ -393,4 +398,19 @@ public class MiBlockDeNotas extends javax.swing.JFrame {
     private javax.swing.JMenuItem salirMenuItem;
     private javax.swing.JTextArea textArea;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void insertUpdate(DocumentEvent e) {
+        huboCambios = true;
+    }
+
+    @Override
+    public void removeUpdate(DocumentEvent e) {
+        huboCambios = true;
+    }
+
+    @Override
+    public void changedUpdate(DocumentEvent e) {
+        huboCambios = true;
+    }
 }
