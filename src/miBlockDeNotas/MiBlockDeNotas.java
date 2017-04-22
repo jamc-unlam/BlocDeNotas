@@ -22,9 +22,122 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  */
 public class MiBlockDeNotas extends javax.swing.JFrame {
 
-    // Variables Globales 
-    boolean huboCambios = false;
-    File archivoFile = null;
+    // Variables internas
+    private boolean huboCambios = false;
+    private File archivoFile = null;
+    
+    //metodos internos
+    
+    private void guardarCambios () {
+        
+        if(huboCambios)
+        {
+            int resp = JOptionPane.showOptionDialog(this, "¿Desea guardar los cambios?", "Hay cambios sin guardar", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, null, null);
+            if(resp == JOptionPane.OK_OPTION)
+                this.guardarMenuItem.doClick();
+        }
+    }
+    
+    private void abrirArchivo () {
+        
+        JFileChooser fileChooser = new JFileChooser();
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("TEXT FILES", "txt", "text");
+        fileChooser.setFileFilter(filter);
+        
+        int resp = fileChooser.showOpenDialog(this);
+        
+        if(resp != JFileChooser.APPROVE_OPTION)
+            return;
+        
+        archivoFile = fileChooser.getSelectedFile();
+        
+        FileReader archivoReader;
+        
+        try
+        {
+            archivoReader = new FileReader(archivoFile);
+        }
+        catch(FileNotFoundException ex)
+        {
+            Logger.getLogger(MiBlockDeNotas.class.getName()).log(Level.SEVERE,null,ex);
+            return;
+        }
+        try
+        {
+            textArea.read(archivoReader, null);
+        }
+        catch(IOException ex)
+        {
+            Logger.getLogger(MiBlockDeNotas.class.getName()).log(Level.SEVERE,null,ex);
+        }
+    }
+    
+    private void guardarArchivoNuevo () {
+        JFileChooser fileChooser = new JFileChooser();
+    
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Archivos de Texto", "txt"));
+
+        int resp = fileChooser.showSaveDialog(this);
+
+        if (resp != JFileChooser.APPROVE_OPTION)
+            return;
+
+        //File archivoFile = fileChooser.getSelectedFile();
+        
+        String path = fileChooser.getSelectedFile().getPath();
+        path = path.substring(0, path.lastIndexOf('.'));
+        archivoFile = new File (path+".txt");
+
+        FileWriter archivoWriter;
+
+        try {
+
+            archivoWriter = new FileWriter(archivoFile);
+        }
+        catch (IOException ex) {
+
+            Logger.getLogger(MiBlockDeNotas.class.getName()).log(Level.SEVERE,null,ex);
+            return;
+        }
+
+        try {
+
+            textArea.write(archivoWriter);
+        }
+        catch (IOException ex) {
+
+            Logger.getLogger(MiBlockDeNotas.class.getName()).log(Level.SEVERE,null,ex);
+        }
+        
+        this.setTitle(archivoFile.getAbsolutePath());
+    }
+    
+    private void guardarArchivoExistente (File archivo) {
+        
+        FileWriter archivoWriter;
+
+        try {
+
+            archivoWriter = new FileWriter(archivo);
+        }
+        catch (IOException ex) {
+
+            Logger.getLogger(MiBlockDeNotas.class.getName()).log(Level.SEVERE,null,ex);
+            return;
+        }
+
+        try {
+
+            textArea.write(archivoWriter);
+        }
+        catch (IOException ex) {
+
+            Logger.getLogger(MiBlockDeNotas.class.getName()).log(Level.SEVERE,null,ex);
+        }
+        
+        this.setTitle(archivo.getAbsolutePath());
+    }
+    
     /**
      * Creates new form MiBlockDeNotas
      */
@@ -165,12 +278,9 @@ public class MiBlockDeNotas extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void nuevoMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nuevoMenuItemActionPerformed
-        if(huboCambios)
-        {
-            int resp = JOptionPane.showOptionDialog(this, "¿Desea guardar los cambios?", "Hay cambios sin guardar", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, null, null);
-            if(resp == JOptionPane.OK_OPTION)
-                this.guardarMenuItem.doClick();
-        }
+        
+        guardarCambios();
+        
         archivoFile=null;
         this.setTitle("");
         textArea.setText("");    
@@ -184,140 +294,36 @@ public class MiBlockDeNotas extends javax.swing.JFrame {
 
     private void abrirMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_abrirMenuItemActionPerformed
         
-        if(huboCambios)
-        {
-            int resp = JOptionPane.showOptionDialog(this, "¿Desea guardar los cambios?", "Hay cambios sin guardar", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, null, null);
-            if(resp == JOptionPane.OK_OPTION)
-                this.guardarMenuItem.doClick();
-        }
+        guardarCambios();
         
+        abrirArchivo();
+                    
+        this.setTitle(archivoFile.getAbsolutePath());
+        huboCambios = false;
         
-        JFileChooser fileChooser = new JFileChooser();
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("TEXT FILES", "txt", "text");
-        fileChooser.setFileFilter(filter);
-        
-        int resp = fileChooser.showOpenDialog(this);
-        
-        if(resp != JFileChooser.APPROVE_OPTION)
-            return;
-        
-        archivoFile = fileChooser.getSelectedFile();
-        
-        FileReader archivoReader;
-        
-        try
-        {
-            archivoReader = new FileReader(archivoFile);
-        }
-        catch(FileNotFoundException ex)
-        {
-            Logger.getLogger(MiBlockDeNotas.class.getName()).log(Level.SEVERE,null,ex);
-            return;
-        }
-        try
-        {
-            textArea.read(archivoReader, null);            
-            this.setTitle(archivoFile.getAbsolutePath());
-            huboCambios = false;
-        }
-        catch(IOException ex)
-        {
-            Logger.getLogger(MiBlockDeNotas.class.getName()).log(Level.SEVERE,null,ex);
-        }
     }//GEN-LAST:event_abrirMenuItemActionPerformed
 
     private void guardarMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_guardarMenuItemActionPerformed
         
-        FileWriter archivoWriter;
-        
         if(archivoFile == null)
-        {
-            JFileChooser fileChooser = new JFileChooser();
-            FileNameExtensionFilter filter = new FileNameExtensionFilter("TEXT FILES", "txt", "text");
-            fileChooser.setFileFilter(filter);
-            int resp = fileChooser.showOpenDialog(this);
-
-            if(resp != JFileChooser.APPROVE_OPTION)
-                return;
-
-            archivoFile = fileChooser.getSelectedFile();
-
-            try
-            {
-                archivoWriter = new FileWriter(archivoFile+".txt");
-            }
-            catch(IOException ex)
-            {
-                Logger.getLogger(MiBlockDeNotas.class.getName()).log(Level.SEVERE,null,ex);
-                return;
-            }
-        }
+            guardarArchivoNuevo();
         else
-        {
-            try
-            {
-                archivoWriter = new FileWriter(archivoFile);
-            }
-            catch(IOException ex)
-            {
-                Logger.getLogger(MiBlockDeNotas.class.getName()).log(Level.SEVERE,null,ex);
-                return;
-            }
-        }
-        try
-        {
-            textArea.write(archivoWriter);
-            this.setTitle(archivoFile.getAbsolutePath());
-            huboCambios = false;
-        }
-        catch(IOException ex)
-        {
-            Logger.getLogger(MiBlockDeNotas.class.getName()).log(Level.SEVERE,null,ex);
-        }
+            guardarArchivoExistente(archivoFile);
+        
+        huboCambios = false;
+            
     }//GEN-LAST:event_guardarMenuItemActionPerformed
 
     private void guardarComoMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_guardarComoMenuItemActionPerformed
-        JFileChooser fileChooser = new JFileChooser();
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("TEXT FILES", "txt", "text");
-        fileChooser.setFileFilter(filter);
         
-        int resp = fileChooser.showOpenDialog(this);
+        guardarArchivoNuevo();
+        this.setTitle(archivoFile.getAbsolutePath());
+        huboCambios = false;
         
-        if(resp != JFileChooser.APPROVE_OPTION)
-            return;
-        
-        archivoFile = fileChooser.getSelectedFile();
-        
-        FileWriter archivoWriter;
-        
-        try
-        {
-            archivoWriter = new FileWriter(archivoFile+".txt");
-        }
-        catch(IOException ex)
-        {
-            Logger.getLogger(MiBlockDeNotas.class.getName()).log(Level.SEVERE,null,ex);
-            return;
-        }
-        try
-        {
-            textArea.write(archivoWriter);
-            this.setTitle(archivoFile.getAbsolutePath());
-            huboCambios = false;
-        }
-        catch(IOException ex)
-        {
-            Logger.getLogger(MiBlockDeNotas.class.getName()).log(Level.SEVERE,null,ex);
-        }
     }//GEN-LAST:event_guardarComoMenuItemActionPerformed
 
     private void salirMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_salirMenuItemActionPerformed
-        if(huboCambios)
-        {
-            int resp = JOptionPane.showOptionDialog(this, "¿Desea guardar los cambios?", "Hay cambios sin guardar", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, null, null);
-            if(resp == JOptionPane.OK_OPTION)
-                this.guardarMenuItem.doClick();
-        }
+        guardarCambios();
         System.exit(0);
     }//GEN-LAST:event_salirMenuItemActionPerformed
 
